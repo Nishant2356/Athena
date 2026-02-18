@@ -35,7 +35,7 @@ export default function ChatPage() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-8rem)]">
+        <div className="flex flex-col h-[calc(100dvh-6rem)] md:h-[calc(100dvh-8rem)]">
             {/* Persona Switcher */}
             <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
                 {PERSONAS.map((p) => (
