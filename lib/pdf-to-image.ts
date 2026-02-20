@@ -1,12 +1,15 @@
-
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 import * as PImage from "pureimage";
 import { Writable } from 'stream';
+import DOMMatrix from "dommatrix";
 
-// Disable worker for Node.js usage to avoid needing a worker file
-pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+if (typeof globalThis.DOMMatrix === 'undefined') {
+    globalThis.DOMMatrix = DOMMatrix as any;
+}
 
 export async function convertPdfToImages(pdfBuffer: Buffer): Promise<Buffer[]> {
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+
     const data = new Uint8Array(pdfBuffer);
 
     // Load document
