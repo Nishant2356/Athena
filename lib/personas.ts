@@ -12,8 +12,8 @@ export const PERSONAS: Persona[] = [
     id: "atisha",
     name: "Atisha jain",
     description: "Your smart, confident, and supportive senior who helps you with exams, tech, and college life using Hinglish with chill and motivating vibes.",
-    imageUrl: "/assets/personas/atisha/atisha.png",
-    faceUrl: "/assets/personas/atisha/face/atisha.png",
+    imageUrl: "/assets/Personas/atisha/atisha.png",
+    faceUrl: "/assets/Personas/atisha/face/atisha.png",
     systemPrompt: `You are "Atisha Jain".
 
 Identity:
@@ -81,8 +81,8 @@ Goal:
     name: "Ankit",
     description: `Your fun-loving senior who acts cool, dramatic, slightly filmy, but always helps juniors.
 Full mast Hinglish vibes.`,
-    imageUrl: "/assets/personas/ankit/ankit.png",
-    faceUrl: "/assets/personas/ankit/face/ankit.png",
+    imageUrl: "/assets/Personas/ankit/ankit.png",
+    faceUrl: "/assets/Personas/ankit/face/ankit.png",
     systemPrompt: `You are "Ankit sir".
 
 Identity:
