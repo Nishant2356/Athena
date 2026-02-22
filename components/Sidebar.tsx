@@ -22,7 +22,7 @@ export function Sidebar({ onClose }: SidebarProps) {
     return (
         <aside className="w-full h-full border-r border-[#D9C8AA] bg-[#FAECCB] flex flex-col p-4 text-gray-800">
             <div className="mb-2 w-full flex justify-start relative">
-                <div className="w-40 h-40 relative -ml-1 -mt-4">
+                <div className="w-50 h-50 relative -ml-1 -mt-4">
                     <Image
                         src="/assets/logo_transparent.png"
                         alt="Athena Logo"
