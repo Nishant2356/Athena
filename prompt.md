@@ -1,1 +1,4 @@
 ok chat so our application interface is currently so bad i want the ui to be as much beautiful and fun as possible so i have an image showing how the theme of the app should really i want it to be the cutish adorable and appealing interfaces so make the entire interface according to the image exactly and make it look very beautiful just put placeholders in the parts where the actual image or animateion is required we will do that in next iterations just set up the interfaces
+
+
+ok chat so for mobile view i only see the chat section i cant see the character arts and persona section which will be shown after i click the icon button i want it to be shown i mean of course when i will chat the character movements will be shown so i wont be swithcing the section again n again right so fix it find a way
