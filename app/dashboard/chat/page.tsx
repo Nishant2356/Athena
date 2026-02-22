@@ -15,11 +15,10 @@ export default function ChatPage() {
 
     const chatConfig: any = {
         api: "/api/chat",
-        body: { personaId: currentPersona.id },
         onError: (err: any) => console.error("Chat Error:", err),
     };
 
-    const { messages, sendMessage, status } = useChat(chatConfig) as any;
+    const { messages, setMessages, stop, sendMessage, status } = useChat(chatConfig) as any;
     const isLoading = status === "streaming" || status === "submitted";
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -29,9 +28,13 @@ export default function ChatPage() {
         const userMessage = input;
         setInput("");
 
-        await sendMessage({
-            text: userMessage,
-        });
+        await sendMessage(
+            { text: userMessage },
+            {
+                headers: { 'x-persona-id': currentPersona.id },
+                body: { personaId: currentPersona.id }
+            }
+        );
     };
 
     return (
@@ -46,12 +49,12 @@ export default function ChatPage() {
 
                     <div className="flex items-center gap-3 mb-2 md:mb-6 relative">
                         <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-white border border-[#D9C8AA] flex items-center justify-center text-lg md:text-2xl shadow-sm overflow-hidden relative">
-                            {currentPersona.imageUrl ? (
+                            {currentPersona.faceUrl || currentPersona.imageUrl ? (
                                 <Image
-                                    src={currentPersona.imageUrl}
+                                    src={currentPersona.faceUrl || currentPersona.imageUrl || ""}
                                     alt={currentPersona.name}
                                     fill
-                                    className="object-cover object-top scale-[1.5] mt-1"
+                                    className="object-cover object-center"
                                 />
                             ) : (
                                 "🤓"
@@ -76,6 +79,8 @@ export default function ChatPage() {
                                         <button
                                             key={p.id}
                                             onClick={() => {
+                                                stop();
+                                                setMessages([]);
                                                 setPersona(p.id);
                                                 setShowSwitcher(false);
                                             }}
@@ -153,10 +158,12 @@ export default function ChatPage() {
                     )}
 
                     {messages.map((m: any) => {
-                        const textContent = m.parts
-                            ?.filter((part: any) => part.type === 'text')
-                            .map((part: any) => part.text)
-                            .join('') || '';
+                        const textContent = m.content || (
+                            m.parts
+                                ?.filter((part: any) => part.type === 'text')
+                                .map((part: any) => part.text)
+                                .join('')
+                        ) || '';
 
                         const isUser = m.role === "user";
 
@@ -164,12 +171,12 @@ export default function ChatPage() {
                             <div key={m.id} className={clsx("flex gap-2 md:gap-3", isUser ? "justify-end" : "justify-start")}>
                                 {!isUser && (
                                     <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center border border-white shadow-sm overflow-hidden mt-1 relative">
-                                        {currentPersona.imageUrl ? (
+                                        {currentPersona.faceUrl || currentPersona.imageUrl ? (
                                             <Image
-                                                src={currentPersona.imageUrl}
+                                                src={currentPersona.faceUrl || currentPersona.imageUrl || ""}
                                                 alt={currentPersona.name}
                                                 fill
-                                                className="object-cover object-top scale-[1.5] mt-1"
+                                                className="object-cover object-center"
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-[#FAECCB] flex items-center justify-center text-[10px] md:text-xl">🤓</div>
@@ -200,7 +207,18 @@ export default function ChatPage() {
 
                     {isLoading && (
                         <div className="flex gap-2 md:gap-3 justify-start">
-                            <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-gray-200 flex-shrink-0 border border-white shadow-sm"></div>
+                            <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-gray-200 flex-shrink-0 border border-white shadow-sm overflow-hidden relative">
+                                {currentPersona.faceUrl || currentPersona.imageUrl ? (
+                                    <Image
+                                        src={currentPersona.faceUrl || currentPersona.imageUrl || ""}
+                                        alt={currentPersona.name}
+                                        fill
+                                        className="object-cover object-center"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-[#FAECCB] flex items-center justify-center text-[10px] md:text-xl">🤓</div>
+                                )}
+                            </div>
                             <div className="px-3 py-2 md:px-5 md:py-3.5 bg-[#FAECCB] text-[#4A3D24] rounded-xl md:rounded-2xl rounded-tl-sm animate-pulse text-xs md:text-[15px]">
                                 Typing...
                             </div>

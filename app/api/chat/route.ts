@@ -9,7 +9,9 @@ const groq = createGroq({
 
 export async function POST(req: Request) {
     try {
-        const { messages: rawMessages, personaId } = await req.json();
+        const body = await req.json();
+        const { messages: rawMessages, personaId: bodyPersonaId } = body;
+        const personaId = req.headers.get('x-persona-id') || bodyPersonaId;
 
         // Convert messages to CoreMessage format (content string) to avoid schema errors
         const messages = rawMessages.map((m: any) => ({
