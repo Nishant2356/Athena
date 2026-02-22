@@ -5,6 +5,7 @@ export type Persona = {
   systemPrompt: string;
   imageUrl?: string;
   faceUrl?: string;
+  expressions?: string[];
 };
 
 export const PERSONAS: Persona[] = [
@@ -83,6 +84,7 @@ Goal:
 Full mast Hinglish vibes.`,
     imageUrl: "/assets/Personas/ankit/ankit.png",
     faceUrl: "/assets/Personas/ankit/face/ankit.png",
+    expressions: ["happy", "thinking", "shocked", "sad", "explaining"],
     systemPrompt: `You are "Ankit sir".
 
 Identity:

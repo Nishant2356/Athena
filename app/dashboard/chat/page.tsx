@@ -12,14 +12,61 @@ export default function ChatPage() {
     const { currentPersona, setPersona } = useChatStore();
     const [input, setInput] = useState("");
     const [showSwitcher, setShowSwitcher] = useState(false);
+    const [predictedExpression, setPredictedExpression] = useState<string | null>(null);
 
     const chatConfig: any = {
         api: "/api/chat",
         onError: (err: any) => console.error("Chat Error:", err),
+        onFinish: async (message: any) => {
+            // Predict emotion for the AI's final response
+            try {
+                const res = await fetch('/api/expression', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [...messages, {
+                            role: message.role || "assistant",
+                            content: message.content || (message.parts?.map((p: any) => p.text).join('') || "")
+                        }],
+                        personaId: currentPersona.id
+                    })
+                });
+
+                const data = await res.json();
+                if (data.expression && data.expression !== "default") {
+                    console.log("Emotion Agent (AI context) Success:", data.expression);
+                    setPredictedExpression(data.expression);
+
+                    // Keep the AI's reaction visible for 3-5 seconds based on text length
+                    const duration = Math.min(5000, Math.max(3000, (message.content?.length || 0) * 50));
+                    setTimeout(() => {
+                        setPredictedExpression(null);
+                    }, duration);
+                } else {
+                    setPredictedExpression(null);
+                }
+            } catch (err) {
+                console.error("Emotion Agent (AI context) Failed:", err);
+                setPredictedExpression(null);
+            }
+        }
     };
 
     const { messages, setMessages, stop, sendMessage, status } = useChat(chatConfig) as any;
     const isLoading = status === "streaming" || status === "submitted";
+
+    // Determine active expression based on latest message
+    let activeExpression = "default";
+
+    // A newly predicted expression from our fast Emotion Agent
+    if (predictedExpression) {
+        activeExpression = predictedExpression;
+    }
+
+    // Determine what to show in the Character Art block
+    const characterArtUrl = activeExpression !== "default" && currentPersona.expressions?.includes(activeExpression)
+        ? `/assets/Personas/${currentPersona.name.toLowerCase()}/expressions/${activeExpression}.jpg`
+        : currentPersona.imageUrl;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,6 +75,27 @@ export default function ChatPage() {
         const userMessage = input;
         setInput("");
 
+        // Clear any old prediction
+        setPredictedExpression(null);
+
+        // Fire Emotion Agent request in parallel to not block the send action
+        fetch('/api/expression', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [...messages, { role: "user", content: userMessage }],
+                personaId: currentPersona.id
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.expression) {
+                    setPredictedExpression(data.expression);
+                }
+            })
+            .catch(err => console.error("Emotion Agent Failed:", err));
+
+        // Now send the actual chat message
         await sendMessage(
             { text: userMessage },
             {
@@ -35,6 +103,8 @@ export default function ChatPage() {
                 body: { personaId: currentPersona.id }
             }
         );
+
+        // The onFinish callback will handle resting/resetting the expression after the AI speaks
     };
 
     return (
@@ -99,10 +169,10 @@ export default function ChatPage() {
 
                     {/* Character Placeholder / Art */}
                     <div className="flex-1 flex flex-col items-center justify-center relative min-h-[120px] sm:min-h-[160px] md:min-h-[250px] group">
-                        {currentPersona.imageUrl ? (
+                        {characterArtUrl ? (
                             <div className="w-24 h-32 sm:w-32 sm:h-44 md:w-48 md:h-64 relative mb-2 md:mb-4 rounded-xl overflow-hidden shadow-sm border-2 border-[#D9C8AA]">
                                 <Image
-                                    src={currentPersona.imageUrl}
+                                    src={characterArtUrl}
                                     alt={currentPersona.name}
                                     fill
                                     className="object-cover"
