@@ -283,7 +283,7 @@ export default function ChatPage() {
                                                         em: ({ node, ...props }) => <em className="italic text-[#5C4D32]" {...props} />,
                                                         blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-[#C4A573] pl-4 italic my-2 text-[#5C4D32]" {...props} />,
                                                         hr: ({ node, ...props }) => <hr className="my-4 border-[#D9C8AA]" {...props} />,
-                                                        pre: ({ node, ...props }) => <div className="my-2 rounded-lg overflow-hidden bg-[#2D2D2D] p-0 border border-gray-700 w-full shadow-inner" {...props} />,
+                                                        pre: ({ node, ref, ...props }: any) => <div className="my-2 rounded-lg overflow-hidden bg-[#2D2D2D] p-0 border border-gray-700 w-full shadow-inner" {...props} />,
                                                         table: ({ node, ...props }) => <div className="overflow-x-auto my-2 w-full"><table className="min-w-full divide-y divide-[#D9C8AA] border border-[#D9C8AA] rounded-md" {...props} /></div>,
                                                         thead: ({ node, ...props }) => <thead className="bg-[#EEDBAC]" {...props} />,
                                                         th: ({ node, ...props }) => <th className="px-3 py-2 text-left text-xs font-bold text-[#4A3D24] uppercase tracking-wider border-b border-[#D9C8AA]" {...props} />,
