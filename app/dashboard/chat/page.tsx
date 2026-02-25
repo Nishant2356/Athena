@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useState } from "react";
 import { useChatStore } from "@/store/chatStore";
 import { clsx } from "clsx";
-import { Edit, Send, Settings, Lightbulb, ThumbsUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit, Send, Settings, Lightbulb, ThumbsUp, ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import Image from "next/image";
 import { PERSONAS } from "@/lib/personas";
 import ReactMarkdown from 'react-markdown';
@@ -66,8 +66,8 @@ export default function ChatPage() {
     }
 
     // Determine what to show in the Character Art block
-    const characterArtUrl = activeExpression !== "default" && currentPersona.expressions?.includes(activeExpression)
-        ? `/assets/Personas/${currentPersona.name.toLowerCase()}/expressions/${activeExpression}.jpg`
+    const characterArtUrl = activeExpression !== "default" && currentPersona.expressions?.includes(activeExpression) && currentPersona.imageUrl
+        ? currentPersona.imageUrl.replace(/\/[^/]+$/, `/expressions/${activeExpression}.${currentPersona.expressionExt || 'jpg'}`)
         : currentPersona.imageUrl;
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -113,31 +113,118 @@ export default function ChatPage() {
         <div className="flex flex-col lg:flex-row h-full gap-3 lg:gap-4 max-w-[1600px] mx-auto overflow-hidden relative">
 
             {/* Top Column on Mobile / Right Column on Desktop: Persona Details */}
-            <div className="w-full lg:w-[320px] flex-shrink-0 flex flex-col gap-2 md:gap-4 order-1 lg:order-2">
+            <div className="w-full lg:w-[320px] flex-shrink-0 hidden lg:flex flex-col gap-2 md:gap-4 order-1 lg:order-2">
                 <div className="bg-[#FAECCB] border border-[#D9C8AA] rounded-2xl p-3 md:p-4 shadow-sm lg:h-full flex flex-col">
-                    <div className="flex justify-between items-center mb-2 md:mb-4">
+
+                    {/* Header: Title (Desktop Only) */}
+                    <div className="justify-between items-center mb-2 md:mb-4 hidden lg:flex">
                         <h3 className="font-bold text-gray-900 tracking-tight text-sm md:text-base">Selected Persona & Reactions</h3>
                     </div>
 
-                    <div className="flex items-center gap-3 mb-2 md:mb-6 relative">
-                        <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-white border border-[#D9C8AA] flex items-center justify-center text-lg md:text-2xl shadow-sm overflow-hidden relative">
-                            {currentPersona.faceUrl || currentPersona.imageUrl ? (
-                                <Image
-                                    src={currentPersona.faceUrl || currentPersona.imageUrl || ""}
-                                    alt={currentPersona.name}
-                                    fill
-                                    className="object-cover object-center"
-                                />
-                            ) : (
-                                "🤓"
-                            )}
-                        </div>
-                        <div>
-                            <div className="font-bold text-gray-900 text-sm md:text-lg">{currentPersona.name}</div>
-                            <div className="text-[10px] md:text-xs text-gray-600">{currentPersona.description.substring(0, 30)}...</div>
+                    <div className="flex flex-row lg:flex-col items-center lg:items-center justify-between lg:mb-6 lg:relative gap-3 lg:gap-0">
+
+                        {/* Grouped: Avatar + Name + Art */}
+                        <div className="flex flex-col lg:flex-col items-center lg:items-center gap-8 md:gap-12 lg:gap-6 min-w-0 w-full pt-4 md:pt-6 lg:pt-0">
+
+                            {/* Avatar & Name */}
+                            <div className="flex items-center gap-2 md:gap-3 shrink-0 mb-4 lg:mb-0">
+                                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white border border-[#D9C8AA] flex items-center justify-center text-lg md:text-2xl shadow-sm overflow-hidden shrink-0 relative">
+                                    {currentPersona.faceUrl || currentPersona.imageUrl ? (
+                                        <Image
+                                            src={currentPersona.faceUrl || currentPersona.imageUrl || ""}
+                                            alt={currentPersona.name}
+                                            fill
+                                            className="object-cover object-center"
+                                        />
+                                    ) : (
+                                        "🤓"
+                                    )}
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="font-bold text-gray-900 text-sm md:text-lg truncate pl-1">{currentPersona.name}</div>
+                                </div>
+                            </div>
+
+                            {/* Character Art with Floating Live Reactions */}
+                            <div className="flex flex-col items-center justify-center relative min-h-[100px] lg:min-h-[250px] group lg:mt-4 lg:w-full shrink-0">
+
+                                {/* Wrapper for Art + Reactions */}
+                                <div className="relative pr-5 lg:pr-0">
+                                    {characterArtUrl ? (
+                                        <div className="w-16 h-24 lg:w-56 lg:h-[300px] relative rounded-lg lg:rounded-2xl overflow-hidden shadow-md border-2 border-[#D9C8AA] bg-[#FDF5E6] transition-all duration-300">
+                                            <Image
+                                                src={characterArtUrl}
+                                                alt={currentPersona.name}
+                                                fill
+                                                className="object-cover transition-transform duration-500 hover:scale-105"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-16 h-24 lg:w-56 lg:h-[300px] bg-white/20 border-2 border-dashed border-[#C4A573]/40 rounded-lg lg:rounded-2xl flex items-center justify-center transition-all group-hover:bg-white/30">
+                                            <span className="text-[#C4A573] font-medium text-[8px] lg:text-sm text-center px-1 lg:px-4">Character Art Pending</span>
+                                        </div>
+                                    )}
+
+                                    {/* Floating Live Reactions */}
+                                    <div className="absolute -right-1 lg:-right-8 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 lg:gap-3 z-10 pointer-events-none">
+                                        {/* Thinking */}
+                                        <div title="Thinking" className={clsx(
+                                            "flex items-center justify-center w-6 h-6 lg:w-12 lg:h-12 rounded-full shadow-sm transition-all duration-300 border lg:border-2",
+                                            isLoading
+                                                ? "bg-[#BCCEE8] border-[#8DA9D4] scale-110 shadow-md ring-2 lg:ring-4 ring-[#BCCEE8]/30"
+                                                : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[30%]"
+                                        )}>
+                                            <Settings className={clsx(
+                                                "w-3 h-3 lg:w-6 lg:h-6 transition-colors",
+                                                isLoading ? "text-[#2F4770] animate-spin-slow" : "text-gray-400"
+                                            )} />
+                                        </div>
+
+                                        {/* Explaining */}
+                                        <div title="Explaining" className={clsx(
+                                            "flex items-center justify-center w-6 h-6 lg:w-12 lg:h-12 rounded-full shadow-sm transition-all duration-300 border lg:border-2",
+                                            activeExpression === 'explaining'
+                                                ? "bg-[#FAECCB] border-[#D9C8AA] scale-110 shadow-md ring-2 lg:ring-4 ring-[#FAECCB]/40"
+                                                : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[50%]"
+                                        )}>
+                                            <Lightbulb className={clsx(
+                                                "w-3 h-3 lg:w-6 lg:h-6 transition-colors",
+                                                activeExpression === 'explaining' ? "text-amber-500 fill-amber-500/30 animate-pulse" : "text-gray-400"
+                                            )} />
+                                        </div>
+
+                                        {/* Happy */}
+                                        <div title="Happy" className={clsx(
+                                            "flex items-center justify-center w-6 h-6 lg:w-12 lg:h-12 rounded-full shadow-sm transition-all duration-300 border lg:border-2",
+                                            activeExpression === 'happy'
+                                                ? "bg-[#FAD8C3] border-[#E8B598] scale-110 shadow-md ring-2 lg:ring-4 ring-[#FAD8C3]/40"
+                                                : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[50%]"
+                                        )}>
+                                            <ThumbsUp className={clsx(
+                                                "w-3 h-3 lg:w-6 lg:h-6 transition-colors",
+                                                activeExpression === 'happy' ? "text-amber-600 fill-amber-600/30 animate-bounce" : "text-gray-400"
+                                            )} />
+                                        </div>
+
+                                        {/* Angry */}
+                                        <div title="Angry" className={clsx(
+                                            "flex items-center justify-center w-6 h-6 lg:w-12 lg:h-12 rounded-full shadow-sm transition-all duration-300 border lg:border-2",
+                                            activeExpression === 'angry'
+                                                ? "bg-[#FCA5A5] border-[#EF4444] scale-110 shadow-md ring-2 lg:ring-4 ring-[#FCA5A5]/40"
+                                                : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[50%]"
+                                        )}>
+                                            <Flame className={clsx(
+                                                "w-3 h-3 lg:w-6 lg:h-6 transition-colors",
+                                                activeExpression === 'angry' ? "text-red-500 fill-red-500/30 animate-pulse" : "text-gray-400"
+                                            )} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="absolute right-0 top-1">
+                        {/* Switcher Button */}
+                        <div className="shrink-0 relative lg:absolute lg:right-0 lg:top-0">
                             <button
                                 onClick={() => setShowSwitcher(!showSwitcher)}
                                 className="text-gray-400 hover:text-gray-600 bg-white/50 p-1.5 rounded-md border border-transparent hover:border-[#D9C8AA] transition-all"
@@ -146,7 +233,7 @@ export default function ChatPage() {
                             </button>
 
                             {showSwitcher && (
-                                <div className="absolute right-0 top-8 w-48 bg-white border border-[#D9C8AA] rounded-xl shadow-lg z-10 overflow-hidden">
+                                <div className="absolute right-0 top-8 w-48 bg-white border border-[#D9C8AA] rounded-xl shadow-lg z-20 overflow-hidden">
                                     {PERSONAS.map(p => (
                                         <button
                                             key={p.id}
@@ -169,52 +256,116 @@ export default function ChatPage() {
                         </div>
                     </div>
 
-                    {/* Character Placeholder / Art */}
-                    <div className="flex-1 flex flex-col items-center justify-center relative min-h-[120px] sm:min-h-[160px] md:min-h-[250px] group">
-                        {characterArtUrl ? (
-                            <div className="w-24 h-32 sm:w-32 sm:h-44 md:w-48 md:h-64 relative mb-2 md:mb-4 rounded-xl overflow-hidden shadow-sm border-2 border-[#D9C8AA]">
-                                <Image
-                                    src={characterArtUrl}
-                                    alt={currentPersona.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        ) : (
-                            <div className="w-24 h-32 sm:w-32 sm:h-44 md:w-48 md:h-64 bg-white/20 border-2 border-dashed border-[#C4A573]/40 rounded-xl flex items-center justify-center mb-2 md:mb-4 transition-all group-hover:bg-white/30">
-                                <span className="text-[#C4A573] font-medium text-[10px] md:text-sm text-center px-2">Character Art</span>
-                            </div>
-                        )}
-                        {/* <button className="w-full py-1.5 md:py-2.5 bg-[#EEDBAC] border border-[#D9C8AA] rounded-xl text-[#786134] font-bold text-xs md:text-sm hover:bg-[#E5CD92] transition-colors shadow-sm mb-1 md:mb-4">
-                            Equipped
-                        </button> */}
-                    </div>
-
-                    {/* Bottom: Live Reactions */}
-                    <div className="bg-[#FDF5E6] border border-[#D9C8AA] rounded-2xl p-2 md:p-4 shadow-inner mt-auto hidden sm:block">
-                        <h4 className="font-bold text-gray-900 text-xs md:text-sm mb-1.5 md:mb-3">Live Reactions</h4>
-                        <div className="flex gap-1.5 md:gap-2 justify-between">
-                            <button className="flex-1 flex flex-col items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-2.5 border border-[#8DA9D4] bg-[#BCCEE8] rounded-xl text-[#2F4770] hover:bg-[#A9C1DE] transition-colors shadow-sm">
-                                <Settings size={18} className="md:w-[22px] md:h-[22px] text-[#4A6B9C] drop-shadow-sm" />
-                                <span className="text-[8px] md:text-[10px] font-bold">Thinking</span>
-                            </button>
-                            <button className="flex-1 flex flex-col items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-2.5 border border-[#D9C8AA] bg-[#FAECCB] rounded-xl text-[#786134] hover:bg-[#F2DFB3] transition-colors shadow-sm">
-                                <Lightbulb size={18} className="md:w-[22px] md:h-[22px] text-amber-500 drop-shadow-sm" />
-                                <span className="text-[8px] md:text-[10px] font-bold">Explaining</span>
-                            </button>
-                            <button className="flex-1 flex flex-col items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-2.5 border border-[#D9C8AA] bg-[#FAECCB] rounded-xl text-[#786134] hover:bg-[#F2DFB3] transition-colors shadow-sm">
-                                <ThumbsUp size={18} className="md:w-[22px] md:h-[22px] text-amber-600 drop-shadow-sm" />
-                                <span className="text-[8px] md:text-[10px] font-bold">Happy</span>
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
+            <div className="flex-1 flex flex-col bg-white/70 border border-[#D9C8AA] rounded-2xl p-2 md:p-4 shadow-sm overflow-hidden order-2 lg:order-1 min-h-0 relative">
 
-            {/* Bottom Column on Mobile / Left Column on Desktop: Chat Area */}
-            <div className="flex-1 flex flex-col bg-white/70 border border-[#D9C8AA] rounded-2xl p-2 md:p-4 shadow-sm overflow-hidden order-2 lg:order-1 min-h-0">
-                <div className="flex items-center justify-between mb-2 px-2">
-                    <h2 className="text-base md:text-xl font-bold tracking-tight text-gray-900">Chat with a Persona Tutor.</h2>
+                {/* Mobile Header (Hidden on Desktop) */}
+                <div className="flex lg:hidden items-center justify-between mb-2 px-2 pb-2 border-b border-[#D9C8AA]/50">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-white border border-[#D9C8AA] flex items-center justify-center text-sm shadow-sm overflow-hidden relative">
+                            {currentPersona.faceUrl || currentPersona.imageUrl ? (
+                                <Image
+                                    src={currentPersona.faceUrl || currentPersona.imageUrl || ""}
+                                    alt={currentPersona.name}
+                                    fill
+                                    className="object-cover object-center"
+                                />
+                            ) : (
+                                "🤓"
+                            )}
+                        </div>
+                        <div className="font-bold text-gray-900 text-sm truncate">{currentPersona.name}</div>
+                        {/* Live Reactions (Mobile Header) */}
+                        <div className="flex flex-row gap-1.5 items-center ml-2">
+                            {/* Thinking */}
+                            <div title="Thinking" className={clsx(
+                                "flex items-center justify-center w-5 h-5 rounded-full shadow-sm transition-all duration-300 border",
+                                isLoading
+                                    ? "bg-[#BCCEE8] border-[#8DA9D4] scale-110 shadow-md ring-2 ring-[#BCCEE8]/30"
+                                    : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[30%]"
+                            )}>
+                                <Settings className={clsx(
+                                    "w-3 h-3 transition-colors",
+                                    isLoading ? "text-[#2F4770] animate-spin-slow" : "text-gray-400"
+                                )} />
+                            </div>
+
+                            {/* Explained / Normal */}
+                            <div title="Explaining" className={clsx(
+                                "flex items-center justify-center w-5 h-5 rounded-full shadow-sm transition-all duration-300 border",
+                                (!isLoading && activeExpression === 'explaining')
+                                    ? "bg-[#D4E8BC] border-[#A9D48D] scale-110 shadow-md ring-2 ring-[#D4E8BC]/40"
+                                    : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[50%]"
+                            )}>
+                                <Lightbulb className={clsx(
+                                    "w-3 h-3 transition-colors",
+                                    (!isLoading && activeExpression === 'explaining') ? "text-[#4B702F] animate-pulse" : "text-gray-400"
+                                )} />
+                            </div>
+
+                            {/* Happy */}
+                            <div title="Happy" className={clsx(
+                                "flex items-center justify-center w-5 h-5 rounded-full shadow-sm transition-all duration-300 border",
+                                activeExpression === 'happy'
+                                    ? "bg-[#FAD8C3] border-[#E8B598] scale-110 shadow-md ring-2 ring-[#FAD8C3]/40"
+                                    : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[50%]"
+                            )}>
+                                <ThumbsUp className={clsx(
+                                    "w-3 h-3 transition-colors",
+                                    activeExpression === 'happy' ? "text-amber-600 fill-amber-600/30 animate-bounce" : "text-gray-400"
+                                )} />
+                            </div>
+
+                            {/* Angry */}
+                            <div title="Angry" className={clsx(
+                                "flex items-center justify-center w-5 h-5 rounded-full shadow-sm transition-all duration-300 border",
+                                activeExpression === 'angry'
+                                    ? "bg-[#FCA5A5] border-[#EF4444] scale-110 shadow-md ring-2 ring-[#FCA5A5]/40"
+                                    : "bg-white/60 border-white/40 opacity-50 scale-90 grayscale-[50%]"
+                            )}>
+                                <Flame className={clsx(
+                                    "w-3 h-3 transition-colors",
+                                    activeExpression === 'angry' ? "text-red-500 fill-red-500/30 animate-pulse" : "text-gray-400"
+                                )} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="relative">
+                        <button onClick={() => setShowSwitcher(!showSwitcher)} className="text-gray-400 hover:text-gray-600 bg-white border border-[#D9C8AA]/50 rounded p-1 shadow-sm">
+                            <Edit size={14} />
+                        </button>
+                        {showSwitcher && (
+                            <div className="absolute top-10 right-0 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                                <div className="p-2 border-b border-gray-100 bg-gray-50/50">
+                                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Switch Persona</h4>
+                                </div>
+                                <div className="max-h-60 overflow-y-auto">
+                                    {PERSONAS.map(p => (
+                                        <button
+                                            key={p.id}
+                                            onClick={() => {
+                                                setPersona(p.id);
+                                                setShowSwitcher(false);
+                                                setPredictedExpression(null);
+                                            }}
+                                            className={clsx(
+                                                "w-full text-left px-4 py-2 text-sm hover:bg-[#FAECCB] transition-colors border-b border-gray-100 last:border-0",
+                                                currentPersona.id === p.id ? "bg-[#FDF5E6] font-bold text-[#786134]" : "text-gray-700 font-medium"
+                                            )}
+                                        >
+                                            {p.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Desktop Header */}
+                <div className="hidden lg:flex items-center justify-between mb-2 px-2">
+                    <h2 className="text-xl font-bold tracking-tight text-gray-900">Chat with a Persona Tutor.</h2>
                     <div className="flex items-center gap-2">
                         <button className="text-gray-400 hover:text-gray-600">
                             <Edit size={16} className="md:w-[18px] md:h-[18px]" />
@@ -358,7 +509,24 @@ export default function ChatPage() {
                     )}
                 </div>
 
-                <form onSubmit={handleSubmit} className="mt-2 flex gap-2 md:gap-3 relative">
+                {/* Mobile Floating Character Art */}
+                <div className="lg:hidden absolute bottom-[55px] right-2 flex flex-row items-end gap-2 pointer-events-none z-10 w-full justify-end">
+                    {/* Removed Floating Live Reactions from Mobile Body */}
+
+                    {/* Character Subject */}
+                    <div className="w-[96px] h-[144px] relative pointer-events-auto filter drop-shadow-md">
+                        {characterArtUrl && (
+                            <Image
+                                src={characterArtUrl}
+                                alt={currentPersona.name}
+                                fill
+                                className="object-contain"
+                            />
+                        )}
+                    </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="mt-2 flex gap-2 md:gap-3 relative z-20">
                     <input
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
@@ -374,6 +542,6 @@ export default function ChatPage() {
                     </button>
                 </form>
             </div>
-        </div >
+        </div>
     );
 }

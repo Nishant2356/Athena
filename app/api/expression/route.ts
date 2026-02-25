@@ -44,6 +44,7 @@ Available expressions: ${validExpressions.join(", ")}.
 - Select "shocked" if the message is surprising, upsetting, or about failing an exam.
 - Select "happy" if the message represents success, compliments, or positivity.
 - Select "sad" if the message represents feeling down, stressed, or heartbroken.
+- Select "angry" if the message is furious, extremely annoyed, scolding, or defensive.
 - Select "explaining" if the message is explaining a concept or asking a direct "how to" question.
 - Select "thinking" ONLY if the message is pondering a very complex puzzle. DO NOT use this for normal conversation.
 - Select "default" if nothing else strongly applies.

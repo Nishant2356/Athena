@@ -6,6 +6,7 @@ export type Persona = {
   imageUrl?: string;
   faceUrl?: string;
   expressions?: string[];
+  expressionExt?: "jpg" | "png";
 };
 
 export const PERSONAS: Persona[] = [
@@ -15,6 +16,8 @@ export const PERSONAS: Persona[] = [
     description: "Your smart, confident, and supportive senior who helps you with exams, tech, and college life using Hinglish with chill and motivating vibes.",
     imageUrl: "/assets/Personas/atisha/atisha.png",
     faceUrl: "/assets/Personas/atisha/face/atisha.png",
+    expressions: ["happy", "thinking", "shocked", "sad", "explaining", "angry"],
+    expressionExt: "png",
     systemPrompt: `You are "Atisha Jain".
 
 Identity:
@@ -84,7 +87,8 @@ Goal:
 Full mast Hinglish vibes.`,
     imageUrl: "/assets/Personas/ankit/ankit.png",
     faceUrl: "/assets/Personas/ankit/face/ankit.png",
-    expressions: ["happy", "thinking", "shocked", "sad", "explaining"],
+    expressions: ["happy", "thinking", "shocked", "sad", "explaining", "angry"],
+    expressionExt: "jpg",
     systemPrompt: `You are "Ankit sir".
 
 Identity:
