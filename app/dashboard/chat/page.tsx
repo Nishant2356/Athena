@@ -7,6 +7,8 @@ import { clsx } from "clsx";
 import { Edit, Send, Settings, Lightbulb, ThumbsUp, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { PERSONAS } from "@/lib/personas";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function ChatPage() {
     const { currentPersona, setPersona } = useChatStore();
@@ -254,23 +256,83 @@ export default function ChatPage() {
                                     </div>
                                 )}
 
-                                <div className="max-w-[85%] md:max-w-[80%] flex flex-col">
+                                <div className="max-w-[85%] md:max-w-[80%] flex flex-col min-w-0">
                                     {!isUser && <span className="text-[8px] md:text-xs font-bold text-gray-700 ml-1 mb-0.5 md:mb-1">{currentPersona.name}</span>}
                                     <div className={clsx(
-                                        "px-3 py-2 md:px-5 md:py-3.5 shadow-sm text-xs md:text-[15px] leading-relaxed break-words",
+                                        "px-3 py-2 md:px-5 md:py-3.5 shadow-sm text-xs md:text-[15px] leading-relaxed break-words overflow-hidden",
                                         isUser
                                             ? "bg-[#ABC4E9] text-[#1E3A5F] rounded-xl md:rounded-2xl rounded-tr-sm"
                                             : "bg-[#FAECCB] text-[#4A3D24] rounded-xl md:rounded-2xl rounded-tl-sm"
                                     )}>
-                                        {textContent}
+                                        {isUser ? (
+                                            textContent
+                                        ) : (
+                                            <div className="prose-sm md:prose-base max-w-none text-[#4A3D24] flex flex-col gap-2 relative z-10">
+                                                <ReactMarkdown
+                                                    remarkPlugins={[remarkGfm]}
+                                                    components={{
+                                                        p: ({ node, ...props }) => <p className="mb-2 last:mb-0 break-words w-full" {...props} />,
+                                                        a: ({ node, ...props }) => <a className="text-[#2F4770] hover:text-[#1E3A5F] underline font-medium break-all" target="_blank" rel="noopener noreferrer" {...props} />,
+                                                        ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-2 last:mb-0 space-y-1 block w-full" {...props} />,
+                                                        ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-2 last:mb-0 space-y-1 block w-full" {...props} />,
+                                                        li: ({ node, ...props }) => <li className="pl-1 mb-1 leading-relaxed w-full break-words" {...props} />,
+                                                        h1: ({ node, ...props }) => <h1 className="text-xl md:text-2xl font-bold mt-4 mb-2 first:mt-0 text-[#2C2415]" {...props} />,
+                                                        h2: ({ node, ...props }) => <h2 className="text-lg md:text-xl font-bold mt-4 mb-2 first:mt-0 text-[#2C2415]" {...props} />,
+                                                        h3: ({ node, ...props }) => <h3 className="text-base md:text-lg font-bold mt-3 mb-1 first:mt-0 text-[#2C2415]" {...props} />,
+                                                        strong: ({ node, ...props }) => <strong className="font-bold text-[#2C2415]" {...props} />,
+                                                        em: ({ node, ...props }) => <em className="italic text-[#5C4D32]" {...props} />,
+                                                        blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-[#C4A573] pl-4 italic my-2 text-[#5C4D32]" {...props} />,
+                                                        hr: ({ node, ...props }) => <hr className="my-4 border-[#D9C8AA]" {...props} />,
+                                                        pre: ({ node, ...props }) => <div className="my-2 rounded-lg overflow-hidden bg-[#2D2D2D] p-0 border border-gray-700 w-full shadow-inner" {...props} />,
+                                                        table: ({ node, ...props }) => <div className="overflow-x-auto my-2 w-full"><table className="min-w-full divide-y divide-[#D9C8AA] border border-[#D9C8AA] rounded-md" {...props} /></div>,
+                                                        thead: ({ node, ...props }) => <thead className="bg-[#EEDBAC]" {...props} />,
+                                                        th: ({ node, ...props }) => <th className="px-3 py-2 text-left text-xs font-bold text-[#4A3D24] uppercase tracking-wider border-b border-[#D9C8AA]" {...props} />,
+                                                        td: ({ node, ...props }) => <td className="px-3 py-2 whitespace-nowrap text-sm border-b border-[#D9C8AA]/50" {...props} />,
+                                                        code: ({ node, inline, className, children, ...props }: any) => {
+                                                            const match = /language-(\w+)/.exec(className || '');
+                                                            const isCodeBlock = !inline && match;
+
+                                                            const isMultiLine = !inline && children && String(children).includes('\n');
+
+                                                            if (isCodeBlock || isMultiLine) {
+                                                                return (
+                                                                    <div className="flex flex-col w-full text-left">
+                                                                        {match && (
+                                                                            <div className="flex items-center justify-between px-3 py-1 bg-[#1E1E1E] border-b border-[#3D3D3D]">
+                                                                                <span className="text-[10px] md:text-xs text-gray-400 font-mono">{match[1]}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="p-3 md:p-4 overflow-x-auto bg-[#2D2D2D]">
+                                                                            <code className="text-xs md:text-sm text-gray-100 font-mono block min-w-full" {...props}>
+                                                                                {children}
+                                                                            </code>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <code className="bg-[#EEDBAC]/70 px-1.5 py-0.5 rounded text-[11px] md:text-[13px] font-mono text-[#786134] whitespace-pre-wrap break-words border border-[#D9C8AA]/30" {...props}>
+                                                                    {children}
+                                                                </code>
+                                                            );
+                                                        }
+                                                    }}
+                                                >
+                                                    {textContent}
+                                                </ReactMarkdown>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                {isUser && (
-                                    <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-[#82A2D4] flex-shrink-0 flex items-center justify-center border border-white shadow-sm mt-1">
-                                        <span className="text-white text-[10px] md:text-sm font-bold">U</span>
-                                    </div>
-                                )}
+                                {
+                                    isUser && (
+                                        <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-[#82A2D4] flex-shrink-0 flex items-center justify-center border border-white shadow-sm mt-1">
+                                            <span className="text-white text-[10px] md:text-sm font-bold">U</span>
+                                        </div>
+                                    )
+                                }
                             </div>
                         );
                     })}
@@ -312,6 +374,6 @@ export default function ChatPage() {
                     </button>
                 </form>
             </div>
-        </div>
+        </div >
     );
 }
