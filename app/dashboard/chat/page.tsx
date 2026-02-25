@@ -185,9 +185,9 @@ export default function ChatPage() {
                                 <span className="text-[#C4A573] font-medium text-[10px] md:text-sm text-center px-2">Character Art</span>
                             </div>
                         )}
-                        <button className="w-full py-1.5 md:py-2.5 bg-[#EEDBAC] border border-[#D9C8AA] rounded-xl text-[#786134] font-bold text-xs md:text-sm hover:bg-[#E5CD92] transition-colors shadow-sm mb-1 md:mb-4">
+                        {/* <button className="w-full py-1.5 md:py-2.5 bg-[#EEDBAC] border border-[#D9C8AA] rounded-xl text-[#786134] font-bold text-xs md:text-sm hover:bg-[#E5CD92] transition-colors shadow-sm mb-1 md:mb-4">
                             Equipped
-                        </button>
+                        </button> */}
                     </div>
 
                     {/* Bottom: Live Reactions */}
